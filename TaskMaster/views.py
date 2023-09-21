@@ -72,8 +72,8 @@ def dashboard_view(request):
 
     if authorized:
         users_in_same_company_division = CustomUser.objects.filter(company=request.user.company, division=request.user.division).exclude(id=request.user.id)
-        tasks_incomplete = Task.objects.filter(assigned_by=request.user.id, is_done=False).exclude(id=request.user.id)
-        tasks_complete = Task.objects.filter(assigned_by=request.user.id, is_done=True).exclude(id=request.user.id)
+        tasks_incomplete = Task.objects.filter(assigned_by=request.user, is_done=False).exclude(id=request.user.id)
+        tasks_complete = Task.objects.filter(assigned_by=request.user, is_done=True).exclude(id=request.user.id)
         context = {
             'users_in_same_company_division': users_in_same_company_division,
             'tasks_incomplete': tasks_incomplete,
@@ -194,8 +194,9 @@ def task_details(request, task_id):
 
             task.documents = document
             task.is_done = True
-            task.finish = datetime.now()  # Set the finish date and time to the current time
+            task.finish = datetime.now()
             task.save()
+            track_user_activity(request.user, f'Upload file: {task.documents.name} to task: {task.task_name}')
 
     return render(request, 'task_details.html', {'task': task, 'authorized': authorized})
 
