@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Task</title>
+</head>
+<body>
+    <h2>Create a New Task</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Create Task</button>
+        <div class="goback">
+            <a href="{% url 'dashboard' %}">Cancel</a>
+        </div>
+    </form>
+</body>
+</html>

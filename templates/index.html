@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TaskMaster</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'index.css' %}">
+</head>
+<body>
+    <div class="dropdown">
+        <button class="dropbtn">Menu &#9660;</button>
+        <div class="dropdown-content">
+            <a href="#">About us</a>
+            <a href="{% url 'signup' %}">Sign Up</a>
+            <a href="{% url 'login_view' %}">Login</a>
+        </div>
+    </div>
+    <h2>Welcome to Task Master Homepage</h2>
+</body>
+</html>

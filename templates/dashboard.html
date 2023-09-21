@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+    <title>Dashboard</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'dashboard.css' %}">
+</head>
+<body>
+    <div class="dropdown">
+        <button class="dropbtn">Menu &#9660;</button>
+        <div class="dropdown-content">
+            <a href="{% url 'profile' %}">Profile</a>
+            <a href="{% url 'notifications_view' %}">Notifications</a>
+            <a href="{% url 'logout' %}">Logout</a>
+        </div>
+    </div>
+    {% if authorized %}
+    <div class="box">
+        <a class="button" href="{% url 'create_task' %}">Assign Task</a>
+    </div>
+    {% endif %}
+    <h1>Welcome, Mr. {{ user.first_name }} {{ user.last_name }} from {{ user.company }}</h1>
+    <p>This is your dashboard page.</p>
+
+    {% if tasks_incomplete %}
+    <h2>In Progress Tasks</h2>
+    <input type="text" id="search-incomplete" placeholder="Search Incomplete Tasks">
+        <table id="incomplete-table">
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Task Name</th>
+                    <th>Assigned by</th>
+                    <th>Assigned to</th>
+                    <th>Start</th>
+                    <th>Deadline</th>
+                    <th>Task Types</th>
+                    <th>Done</th>
+                    <th>Expired</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks_incomplete %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        {% if authorized %}
+                        <td><a href="{% url 'edit_task' task.id %}">{{ task.task_name }}</a></td>
+                        {% else %}
+                        <td><a href="{% url 'task_details' task.id %}">{{ task.task_name }}</a></td>
+                        {% endif %}
+                        <td>{{ task.assigned_by.first_name }} {{ task.assigned_by.last_name }}</td>
+                        <td>
+                            {% for user in task.assigned_to.all %}
+                                -{{ user.first_name }} {{ user.last_name }}<br>
+                            {% endfor %}
+                        </td>
+                        <td>{{ task.start }}</td>
+                        <td>{{ task.deadline }}</td>
+                        <td>{{ task.types }}</td>
+                        <td>
+                            {% if task.is_done %}
+                                <span class="circle green"></span>
+                            {% else %}
+                                <span class="circle red"></span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if task.is_expired %}
+                                <span class="circle green"></span>
+                            {% else %}
+                                <span class="circle red"></span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    {% if tasks_complete %}
+    <h2>Completed Tasks</h2>
+    <input type="text" id="search-complete" placeholder="Search Completed Tasks">
+        <table id="complete-table">
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Task Name</th>
+                    <th>Assigned by</th>
+                    <th>Assigned to</th>
+                    <th>Start</th>
+                    <th>Deadline</th>
+                    <th>Finish</th>
+                    <th>Done</th>
+                    <th>Expired</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks_complete %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        {% if authorized %}
+                        <td><a href="{% url 'edit_task' task.id %}">{{ task.task_name }}</a></td>
+                        {% else %}
+                        <td><a href="{% url 'task_details' task.id %}">{{ task.task_name }}</a></td>
+                        {% endif %}
+                        <td>{{ task.assigned_by.first_name }} {{ task.assigned_by.last_name }}</td>
+                        <td>
+                            {% for user in task.assigned_to.all %}
+                                ->{{ user.first_name }} {{ user.last_name }}<br>
+                            {% endfor %}
+                        </td>
+                        <td>{{ task.start }}</td>
+                        <td>{{ task.deadline }}</td>
+                        <td>{{ task.finish }}</td>
+                        <td>
+                            {% if task.is_done %}
+                                <span class="circle green"></span>
+                            {% else %}
+                                <span class="circle red"></span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if task.is_expired %}
+                                <span class="circle green"></span>
+                            {% else %}
+                                <span class="circle red"></span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    {% if authorized %}
+    <h2>Employee List</h2>
+    <input type="text" id="search-employee" placeholder="Search Employee">
+        <table id="employee-table">
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Division</th>
+                    <th>Position</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for other_user in users_in_same_company_division %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ other_user.first_name }} {{ other_user.last_name }}</td>
+                        <td>{{ other_user.email }}</td>
+                        <td>{{ other_user.division }}</td>
+                        <td>{{ other_user.position }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+</body>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Function to filter the table rows based on the search input
+        function filterTable(tableId, searchInputId) {
+            var input, filter, table, tr, td, i, txtValue;
+            input = document.getElementById(searchInputId);
+            filter = input.value.toUpperCase();
+            table = document.getElementById(tableId);
+            tr = table.getElementsByTagName("tr");
+
+            for (i = 0; i < tr.length; i++) {
+                td = tr[i].getElementsByTagName("td")[1]; // Assuming the task name is in the second column
+                if (td) {
+                    txtValue = td.textContent || td.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+
+        // Event listeners for search input fields
+        $("#search-incomplete").on("input", function () {
+            filterTable("incomplete-table", "search-incomplete");
+        });
+
+        $("#search-complete").on("input", function () {
+            filterTable("complete-table", "search-complete");
+        });
+
+        $("#search-employee").on("input", function () {
+            filterTable("employee-table", "search-employee");
+        });
+    });
+</script>
+</html>

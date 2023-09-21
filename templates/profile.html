@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Profile</title>
+</head>
+<body>
+    <div class="goback">
+        <a href="{% url 'dashboard' %}">Back to Dashboard</a>
+    </div>
+    <div>
+        <h1>{{ user.first_name }} {{ user.last_name }}'s Profile</h1>
+        <p> </p>
+        <p>Name: {{ user.first_name }} {{ user.last_name }}</p>
+        <p>Email: {{ user.email }}</p>
+        <p>Company: {{ user.company }}</p>
+        <p>Division: {{ user.division }}</p>
+        <p>Position: {{ user.position }}</p>
+        <p>Joined at: {{ user.date_joined }}</p>
+    </div>
+    <a href="{% url 'update_profile' %}"> Update profile</a>
+    <div>
+        <h2>Employee List</h2>
+        <input type="text" id="search-employee" placeholder="Search Employee">
+            <table id="employee-table">
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Division</th>
+                        <th>Position</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for other_user in users_in_same_company %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ other_user.first_name }} {{ other_user.last_name }}</td>
+                            <td>{{ other_user.email }}</td>
+                            <td>{{ other_user.division }}</td>
+                            <td>{{ other_user.position }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+    </div>
+</body>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Function to filter the table rows based on the search input
+        function filterTable(tableId, searchInputId) {
+            var input, filter, table, tr, td, i, txtValue;
+            input = document.getElementById(searchInputId);
+            filter = input.value.toUpperCase();
+            table = document.getElementById(tableId);
+            tr = table.getElementsByTagName("tr");
+
+            for (i = 0; i < tr.length; i++) {
+                td = tr[i].getElementsByTagName("td")[1]; // Assuming the task name is in the second column
+                if (td) {
+                    txtValue = td.textContent || td.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+
+        // Event listeners for search input fields
+        $("#search-employee").on("input", function () {
+            filterTable("employee-table", "search-employee");
+        });
+    });
+</script>
+</html>

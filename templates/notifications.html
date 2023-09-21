@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Notifications</title>
+</head>
+<body>
+    <h1>Your Notifications</h1>
+
+    <ul>
+        {% for notification in user_notifications %}
+            <li>
+                <a href="{% url 'mark_notification_as_read' notification.id %}">{{ notification.message }}</a>
+                {% if not notification.is_read %}
+                    <strong>(Unread)</strong>
+                {% endif %}
+                <small>{{ notification.timestamp }}</small>
+            </li>
+        {% empty %}
+            <p>No notifications to display.</p>
+        {% endfor %}
+    </ul>
+</body>
+</html>

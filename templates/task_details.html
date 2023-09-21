@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+    <title>Task Details</title>
+</head>
+<body>
+    <h1>Task Details</h1>
+    <h2>{{ task.task_name }}</h2>
+    <p>Assigned by: {{ task.assigned_by.first_name }} {{ task.assigned_by.last_name }}</p>
+    <p>Start: {{ task.start }}</p>
+    <p>Deadline: {{ task.deadline }}</p>
+    <p>Finish: {{ task.finish }}</p>
+    <p>Done: {% if task.is_done %}Yes{% else %}No{% endif %}</p>
+    <p>Expired: {% if task.is_expired %}Yes{% else %}No{% endif %}</p>
+    {% if task.is_done %}
+    <p> Document Submitted: <a href="{% url 'download_document' task_id=task.id %}">{{ task.documents.name }}</a></p>
+    {% endif %}
+
+
+    {% if not task.is_done %}
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <label for="document">Upload Document:</label>
+            <input type="file" name="document" id="document" accept=".pdf, .doc, .docx">
+            <button type="submit">Submit Document and Mark as Done</button>
+        </form>
+    {% endif %}
+
+    {% if task.is_done %}
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <label for="document">Upload Document:</label>
+            <input type="file" name="document" id="document" accept=".pdf, .doc, .docx">
+            <button type="submit">Resubmit Document and Mark as Done</button>
+        </form>
+    {% endif %}
+
+    <a href="{% url 'dashboard' %}">Back to Dashboard</a>
+</body>
+</html>
