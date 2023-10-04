@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import CustomUser, Task, Notification, UserActivity
+from .models import CustomUser, Task, Notification, UserActivity, Project
 
 
 class CustomUserAdmin(admin.ModelAdmin):
@@ -21,11 +21,19 @@ class NotificationAdmin(admin.ModelAdmin):
 
 
 class UserActivityAdmin(admin.ModelAdmin):
-    list_display = ('user', 'action', 'timestamp')
+    list_display = ('user', 'action', 'action_elaborated', 'timestamp')
     search_fields = ('user__email', 'action')
+
+
+class ProjectAdmin(admin.ModelAdmin):
+    list_display = ['name', 'start_date', 'end_date', 'created_by', 'is_done', 'finish']
+    list_filter = ['is_done', 'created_by']
+    search_fields = ['name', 'created_by__username']
+    date_hierarchy = 'start_date'
 
 
 admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(Task, TaskAdmin)
 admin.site.register(Notification, NotificationAdmin)
 admin.site.register(UserActivity, UserActivityAdmin)
+admin.site.register(Project, ProjectAdmin)

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Project</title>
+</head>
+<body>
+    <h2>Create a New Project</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Create Project</button>
+        <div class="goback">
+            <a href="{% url 'dashboard' %}">Cancel</a>
+        </div>
+    </form>
+</body>
+</html>

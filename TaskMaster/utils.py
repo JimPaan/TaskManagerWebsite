@@ -1,6 +1,8 @@
 from django.core.mail import send_mail
 from django.conf import settings
 from .models import Notification, UserActivity
+import pandas as pd
+import matplotlib as mtplot
 
 
 def send_email_notification_task(user, task):
@@ -18,10 +20,20 @@ def send_email_notification_task(user, task):
             message=f'New Task: {task.task_name}',
         )
 
-        track_user_activity(user, f'{user.first_name} {user.last_name} send email and notification to {user_assigned.first_name} {user_assigned.last_name}')
+        track_user_activity(user, 'Send email and notification', f'{user.first_name} {user.last_name} send email and notification to {user_assigned.first_name} {user_assigned.last_name}')
 
 
-def track_user_activity(user, action):
+def track_user_activity(user, action, action_elaborate):
     UserActivity.objects.create(
         user=user,
-        action=action)
+        action=action,
+        action_elaborated=action_elaborate)
+
+
+def analysis(user):
+    user_activity_data = UserActivity.objects.filter(user=user, action='Login').order_by('-timestamp')
+    count_login = len(user_activity_data)
+    user_activity_data_df = pd.DataFrame(list(user_activity_data))
+
+    # print(count_login)
+    # print(user_activity_data_df.count())

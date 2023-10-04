@@ -34,7 +34,7 @@ class LogoutTrackingMiddleware:
 
 
 def user_logged_out_handler(sender, request, **kwargs):
-    track_user_activity(request.user, 'Logout')
+    track_user_activity(request.user, 'Logout', 'Logout')
 
 
 # Connect the user_logged_out signal to the user_logged_out_handler function

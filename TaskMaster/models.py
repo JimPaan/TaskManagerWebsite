@@ -40,16 +40,43 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         return self.email
 
 
+class Project(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+    created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    collaborated_with = models.ManyToManyField(CustomUser, related_name='projects_collaborated_with')
+    is_done = models.BooleanField(default=False)
+    finish = models.DateTimeField(null=True, blank=True)
+
+    @property
+    def is_expired(self):
+        return self.end_date <= timezone.now()
+
+    def update_is_done(self):
+        if self.task_set.filter(is_done=False).count() == 0:
+            self.is_done = True
+        else:
+            self.is_done = False
+
+        self.save()
+
+    def __str__(self):
+        return self.name
+
+
 class Task(models.Model):
     task_name = models.CharField(max_length=100)
     assigned_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='assigned_tasks')
     assigned_to = models.ManyToManyField(CustomUser, related_name='tasks_assigned_to')
     start = models.DateTimeField()
     deadline = models.DateTimeField()
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True, blank=True)
     is_done = models.BooleanField(default=False)
     finish = models.DateTimeField(null=True, blank=True)
     documents = models.FileField(upload_to='task_documents/', null=True, blank=True)
-    types = models.CharField(max_length=50, default='Urgent')
+    types = models.CharField(max_length=50, default='Urgent and Important')
 
     @property
     def is_expired(self):
@@ -73,7 +100,11 @@ class Notification(models.Model):
 class UserActivity(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     action = models.CharField(max_length=255)
+    action_elaborated = models.CharField(max_length=255)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user} - {self.action}"
+        return f"{self.user.first_name}  {self.user.last_name}- {self.action} - {self.timestamp}"
+
+
+
