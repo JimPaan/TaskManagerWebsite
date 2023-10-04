@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Project Details</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'project_details.css' %}">
+</head>
+<body>
+    {% if authorized %}
+    <div class="box">
+        <a class="button" href="{% url 'create_task' %}">Assign Task</a>
+    </div>
+    {% endif %}
+    <h1>Project: {{ project.name }}</h1>
+    <p>Description: {{ project.description }}</p>
+    <p>Start Date: {{ project.start_date }}</p>
+    <p>End Date: {{ project.end_date }}</p>
+
+    <h2>Project Leader</h2>
+    <p>{{ project.created_by.first_name }} {{ project.created_by.last_name }}</p>
+
+    <h2>Project Contributor</h2>
+    {% for user in project.collaborated_with.all %}
+    <p>{{ user.first_name }} {{ user.last_name }}</p>
+    {% endfor %}
+
+    <h2>Tasks in this Project:</h2>
+        <table id="tasks-table">
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Task Name</th>
+                    <th>Assigned by</th>
+                    <th>Assigned to</th>
+                    <th>Start</th>
+                    <th>Deadline</th>
+                    <th>Task Types</th>
+                    <th>Done</th>
+                    <th>Expired</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        {% if authorized %}
+                        <td><a href="{% url 'edit_task' task.id %}">{{ task.task_name }}</a></td>
+                        {% else %}
+                        <td><a href="{% url 'task_details' task.id %}">{{ task.task_name }}</a></td>
+                        {% endif %}
+                        <td>{{ task.assigned_by.first_name }} {{ task.assigned_by.last_name }}</td>
+                        <td>
+                            {% for user in task.assigned_to.all %}
+                                -{{ user.first_name }} {{ user.last_name }}<br>
+                            {% endfor %}
+                        </td>
+                        <td>{{ task.start }}</td>
+                        <td>{{ task.deadline }}</td>
+                        <td>{{ task.types }}</td>
+                        <td>
+                            {% if task.is_done %}
+                                <span class="circle green"></span>
+                            {% else %}
+                                <span class="circle red"></span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if task.is_expired %}
+                                <span class="circle green"></span>
+                            {% else %}
+                                <span class="circle red"></span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    <div class="progress-circle">
+        <div class="progress-circle-inner" data-progress="{{ project.progress }}"></div>
+    </div>
+
+</body>
+<script>
+    function updateProgressBar() {
+        const completedTasks = {{ tasks_completed }};
+        const totalTasks = {{ tasks_count }};
+        const progress = (completedTasks / totalTasks) * 100;
+
+        const innerCircle = document.querySelector('.progress-circle-inner');
+        innerCircle.style.transform = `rotate(${progress}deg)`;
+        innerCircle.dataset.progress = progress;
+    }
+
+    updateProgressBar();
+</script>
+</html>

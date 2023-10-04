@@ -1,3 +1,0 @@
-email_address =
-password =
-app_pasword =

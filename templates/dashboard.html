@@ -17,6 +17,7 @@
     {% if authorized %}
     <div class="box">
         <a class="button" href="{% url 'create_task' %}">Assign Task</a>
+        <a class="button" href="{% url 'create_project' %}">Assign Project</a>
     </div>
     {% endif %}
     <h1>Welcome, Mr. {{ user.first_name }} {{ user.last_name }} from {{ user.company }}</h1>
@@ -132,6 +133,57 @@
         </table>
     {% endif %}
 
+    {% if projects %}
+    <h2>Projects</h2>
+    <input type="text" id="search-project" placeholder="Search Project">
+        <table id="project-table">
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Name</th>
+                    <th>Created</th>
+                    <th>Collaboration</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Finish</th>
+                    <th>Done</th>
+                    <th>Expired</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for project in projects %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td><a href="{% url 'project_details' project.id %}">{{ project.name }}</a></td>
+                        <td>{{ project.created_by.first_name }} {{ project.created_by.last_name }}</td>
+                        <td>
+                            {% for user in project.collaborated_with.all %}
+                                ->{{ user.first_name }} {{ user.last_name }}<br>
+                            {% endfor %}
+                        </td>
+                        <td>{{ project.start_date }}</td>
+                        <td>{{ project.end_date }}</td>
+                        <td>{{ project.finish }}</td>
+                        <td>
+                            {% if project.is_done %}
+                                <span class="circle green"></span>
+                            {% else %}
+                                <span class="circle red"></span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if project.is_expired %}
+                                <span class="circle green"></span>
+                            {% else %}
+                                <span class="circle red"></span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
     {% if authorized %}
     <h2>Employee List</h2>
     <input type="text" id="search-employee" placeholder="Search Employee">
@@ -171,7 +223,7 @@
             tr = table.getElementsByTagName("tr");
 
             for (i = 0; i < tr.length; i++) {
-                td = tr[i].getElementsByTagName("td")[1]; // Assuming the task name is in the second column
+                td = tr[i].getElementsByTagName("td")[1];
                 if (td) {
                     txtValue = td.textContent || td.innerText;
                     if (txtValue.toUpperCase().indexOf(filter) > -1) {
@@ -194,6 +246,10 @@
 
         $("#search-employee").on("input", function () {
             filterTable("employee-table", "search-employee");
+        });
+
+        $("#search-project").on("input", function () {
+            filterTable("project-table", "search-project");
         });
     });
 </script>

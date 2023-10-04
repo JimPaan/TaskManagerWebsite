@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import CustomUser, Task
+from .models import CustomUser, Task, Project
 
 
 class SignupForm(UserCreationForm):
@@ -72,7 +72,7 @@ class TaskForm(forms.ModelForm):
 
     class Meta:
         model = Task
-        fields = ['task_name', 'start', 'deadline', 'assigned_to', 'types']
+        fields = ['task_name', 'start', 'deadline', 'assigned_to', 'types', 'project']
         widgets = {
             'start': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
             'deadline': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
@@ -83,7 +83,8 @@ class TaskForm(forms.ModelForm):
         super(TaskForm, self).__init__(*args, **kwargs)
 
         if current_user:
-            self.fields['assigned_to'].queryset = CustomUser.objects.filter(company=current_user.company, division=current_user.division).exclude(id=current_user.id)
+            self.fields['assigned_to'].queryset = CustomUser.objects.filter(company=current_user.company).exclude(id=current_user.id)
+            self.fields['project'].queryset = Project.objects.filter(created_by=current_user)
 
 
 class UpdateProfileForm(forms.ModelForm):
@@ -137,3 +138,27 @@ class UpdateProfileForm(forms.ModelForm):
     class Meta:
         model = CustomUser
         fields = ['email', 'first_name', 'last_name', 'company', 'division', 'position']
+
+
+class ProjectForm(forms.ModelForm):
+    collaborated_with = forms.ModelMultipleChoiceField(
+        queryset=CustomUser.objects.all(),
+        widget=forms.SelectMultiple(attrs={'class': 'form-control'}),
+    )
+
+    class Meta:
+        model = Project
+        fields = ['name', 'description', 'start_date', 'end_date', 'collaborated_with']
+        widgets = {
+            'start_date': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+            'end_date': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        current_user = kwargs.pop('current_user', None)
+        super(ProjectForm, self).__init__(*args, **kwargs)
+
+        if current_user:
+            self.fields['collaborated_with'].queryset = CustomUser.objects.filter(
+                company=current_user.company
+            ).exclude(id=current_user.id)
